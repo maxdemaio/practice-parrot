@@ -19,6 +19,7 @@ export default NextAuth({
   secret: process.env.SECRET,
   callbacks: {
     async session({ session, user }) {
+      // normal sign in, check if they're in the DB
       const { parrotColor } = await prisma.user.findUnique({
         where: {
           id: user.id,
@@ -27,6 +28,7 @@ export default NextAuth({
           parrotColor: true,
         },
       });
+      // new user, give them a random color and add to the DB
       if (!parrotColor) {
         const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
         await prisma.user.update({
@@ -41,6 +43,7 @@ export default NextAuth({
       } else {
         session.user.parrotColor = parrotColor;
       }
+      // return the session
       return session;
     },
   },
